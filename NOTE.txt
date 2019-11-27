@@ -1,0 +1,84 @@
+{{ FITUR }}
+
+Login 
+=> Validasi berjalan lancar
+=> Userdata yang diambil saat validasi login yaitu sesi, nis, dan role
+^userdata sesi digunakan untuk keputusan disable/non disable yang berguna untuk mengamankan proses masuknya sesi
+^userdata nis digunakan untuk update status voter menjadi == 1 atau sudah memilih
+^userdata role digunakan untuk keputusan saat redirect controller
+
+Token
+=> validasinya melakukan pencocokan data dari in_post token dengan token yang ada di database
+=> fungsi disable digunakan ketika userdata['sesi'] belum aktif/telah selesai
+=> method back digunakan untuk kembali ke login page dan juga berfungsi untuk meng unset_userdata nis, role, dan sesi yang masuk ke controller token
+=> userdata yang disimpan dicontroller token yaitu kelas dan nis
+^userdata nis digunakan sebagai patokan saat menampilkan data dihalaman pemilihan dan juga digunakan untuk update status menjadi == 1
+^userdata kelas digunakan untuk update data difield 'sudah' table 'kelas'
+
+Moderator
+=> moderator berfungsi untuk mengaktifkan dan menonaktifkan sesi pemilihan
+=> melihat jumlah siswa yang telah memilih dan belum memilih
+=> fungsi yang ada pada controller moderator
+^=> activation > berfungsi untuk mengaktifkan sesi pemilihan
+^=> completed > berfungsi untuk mengakhirkan sesi pemilihan agar tidak ada yang bisa mengaktifkan sesi setelah sesi selesai kecuali superadmin
+^=> default > berfungsi untuk mereset sesi dan nantinya sesi bisa diaktifkan lagi, method default hanya bisa diakses melalui url
+	
+
+Voter
+=>!data kandidat masih ditampilkan dalam table
+=>data user ditampilkan untuk kepentingan proses testing
+=>fungsi pemilihan menggunakan cara update data dengan mengirimkan *id yang diterima oleh "Voter/pilih"
+=> fungsi yang ada di method pilih
+^=> update status menjadi == 1 berdasarkan nis dari userdata yang masuk ke controller voter
+^=> update data kandidat berdasarkan *id yang dikirimkan
+^=> update field sudah set "sudah+1" berdasarkan kelas dari userdata yang masuk ke controller voter
+^=> unset_userdata kelas dan nis, serta diberi alert "Terima Kasih Telah Memilih"
+
+{{ ALUR APLIKASI }}
+
+1. Login => if'guru' => Voter => proses pemilihan => auto logout
+			if'siswa' => Token if'aktif && benar' => Voter => proses pemilihan => auto logout 
+							   if'nonaktif // salah' >= Login
+=>>
+Login => input NIS/NIP
+	  => input Tanggal Lahir
+
+Token => input token yang diberikan oleh superadmin melalui moderator
+
+Voter => memilih kandidat, setelah memilih siswa akan otomatis logout
+
+{{ CONTROLLER }}
+Auth~
+CREATE => !- | Fungsi login sudah berjalan lancar
+READ => ()	 |
+UPDATE => !- |
+DELETE => !- |
+
+Token~
+CREATE => !- | Fungsi validasi token lancar
+READ => ()	 | 
+UPDATE => !- | 
+DELETE => !- |
+
+Staff~
+CREATE => (-) | Fungsi login sudah berjalan lancar , kurang redirect ke controller admin
+READ => ()    |
+UPDATE => (-) |
+DELETE => (-) |
+
+Moderator~
+CREATE => !- | Fungsi mengaktifkan sesi lancar, mengakhirkan sesi lancar, melihat "sudah" lancar
+READ => ()	 |
+UPDATE => () |
+DELETE => !- |
+
+Voter~
+CREATE => !- | Fungsi voting oleh guru sudah berhasil
+READ =>()	 |
+UPDATE => () |
+DELETE => !- |
+
+
+
+
+!!>> BUTUH DITAMBAH FUNGSI RESET <<!!
